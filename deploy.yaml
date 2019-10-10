@@ -32,7 +32,6 @@ spec:
   ports:
     - name: http
       port: 8161
-      nodePort: 30010
 
     - name: endpoint
       port: 61616

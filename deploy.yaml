@@ -37,4 +37,4 @@ spec:
     - name: endpoint
       port: 61616
 
-  type: NodePort
+  type: ClusterIP

@@ -7,7 +7,7 @@ pipeline {
      // YOUR_DOCKERHUB_USERNAME (it doesn't matter if you don't have one)
 
      SERVICE_NAME = "fleetman-queue"
-     REPOSITORY_TAG="${YOUR_DOCKERHUB_USERNAME}/${ORGANIZATION_NAME}-${SERVICE_NAME}:${BUILD_ID}"
+     REPOSITORY_TAG="${SERVICE_NAME}:${BUILD_ID}"
    }
 
    stages {
@@ -28,7 +28,27 @@ pipeline {
            sh 'docker image build -t ${REPOSITORY_TAG} .'
          }
       }
+      stage('SonarQube') {
+         steps {
+            //sh '''mvn sonar:sonar Dsonar.projectKey=api-gateway -Dsonar.host.url=http://sonarqube.eqslearning.com:9000 -Dsonar.login=6048d8ddd7bca6b0eb9051d5e899ae8ab07f0d45'''
+            sh 'echo $HOSTNAME'
+         }
+      }
+       stage('Build Image') {
+         steps {
+           sh 'scp -r ${WORKSPACE} jenkins@${DOCKER_HOST_IP}:/home/jenkins/docker/${BUILD_ID}'
+           sh 'ssh jenkins@${DOCKER_HOST_IP} docker image build -t ${REPOSITORY_TAG} /home/jenkins/docker/${BUILD_ID}'
+           sh 'ssh jenkins@${DOCKER_HOST_IP} docker image ls'
+         }
+      }
 
+      stage('Push Image to repo') {
+          steps {
+           sh 'ssh jenkins@${DOCKER_HOST_IP} docker tag ${REPOSITORY_TAG} ${DOCKERHUB_URL}/${DOCKER_PROJECT_NAME}/${REPOSITORY_TAG}'
+           sh 'ssh jenkins@${DOCKER_HOST_IP} docker push ${DOCKERHUB_URL}/${DOCKER_PROJECT_NAME}/${REPOSITORY_TAG}'
+          }
+      }
+      
       stage('Deploy to Cluster') {
           steps {
             sh 'envsubst < ${WORKSPACE}/deploy.yaml | kubectl apply -f -'

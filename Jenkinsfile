@@ -7,7 +7,8 @@ pipeline {
      // YOUR_DOCKERHUB_USERNAME (it doesn't matter if you don't have one)
 
      SERVICE_NAME = "fleetman-queue"
-     REPOSITORY_TAG="${SERVICE_NAME}:${BUILD_ID}"
+     IMAGE_TAG="${SERVICE_NAME}:${BUILD_ID}"
+     REPOSITORY_TAG="${DOCKERHUB_URL}/${DOCKER_PROJECT_NAME}/${SERVICE_NAME}:${BUILD_ID}"
    }
 
    stages {
@@ -32,16 +33,16 @@ pipeline {
        stage('Build Image') {
          steps {
            sh 'scp -r ${WORKSPACE} jenkins@${DOCKER_HOST_IP}:/home/jenkins/docker/${BUILD_ID}'
-           sh 'ssh jenkins@${DOCKER_HOST_IP} docker image build -t ${REPOSITORY_TAG} /home/jenkins/docker/${BUILD_ID}'
+           sh 'ssh jenkins@${DOCKER_HOST_IP} docker image build -t ${IMAGE_TAG} /home/jenkins/docker/${BUILD_ID}'
            sh 'ssh jenkins@${DOCKER_HOST_IP} docker image ls'
-           sh 'ssh jenkins@${DOCKER_HOST_IP} rm -rf /home/jenkins/docker/${BUILD_ID}'
+           sh 'ssh jenkins@${DOCKER_HOST_IP} rm -rf/home/jenkins/docker/${BUILD_ID}'
          }
       }
 
       stage('Push Image to repo') {
           steps {
-           sh 'ssh jenkins@${DOCKER_HOST_IP} docker tag ${REPOSITORY_TAG} ${DOCKERHUB_URL}/${DOCKER_PROJECT_NAME}/${REPOSITORY_TAG}'
-           sh 'ssh jenkins@${DOCKER_HOST_IP} docker push ${DOCKERHUB_URL}/${DOCKER_PROJECT_NAME}/${REPOSITORY_TAG}'
+           sh 'ssh jenkins@${DOCKER_HOST_IP} docker tag ${IMAGE_TAG} ${REPOSITORY_TAG}'
+           sh 'ssh jenkins@${DOCKER_HOST_IP} docker push ${REPOSITORY_TAG}'
           }
       }
       

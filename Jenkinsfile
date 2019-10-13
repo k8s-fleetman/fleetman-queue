@@ -51,7 +51,6 @@ pipeline {
             sh """sed -i 's+REPOSITORY_TAG+'"${REPOSITORY_TAG}"'+' deploy.yaml"""
             sh 'cat deploy.yaml'
             sh 'kubectl apply -f deploy.yaml'
-            sh '''echo Still working on it'''
           }
       }
    }

@@ -49,6 +49,10 @@ pipeline {
       stage('Deploy to Cluster') {
           steps {
             //sh 'envsubst < ${WORKSPACE}/deploy.yaml | kubectl apply -f -'
+            sh 'cat deploy.yaml'
+            sh """sed -i 's+REPOSITORY_TAG+'"${REPOSITORY_TAG}"'+' deploy.yaml"""
+            sh 'cat deploy.yaml'
+            sh 'kubectl apply -f deploy.yaml'
             sh '''echo Still working on it'''
           }
       }
